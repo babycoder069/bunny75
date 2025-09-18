@@ -1,0 +1,685 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BUNNY AI PREDICTOR</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #5a75f1;
+            --secondary: #3f37c9;
+            --accent: #4cc9f0;
+            --accent-light: #6fd5f3;
+            --success: #38b000;
+            --danger: #ef233c;
+            --warning: #ffaa00;
+            --dark: #12141d;
+            --darker: #0a0b10;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --glass: rgba(18, 20, 29, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--darker), var(--dark));
+            color: var(--light);
+            overflow-x: hidden;
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(76,201,240,0.1) 0%, rgba(76,201,240,0) 70%);
+            z-index: -1;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .title {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            color: var(--light);
+            position: relative;
+            display: inline-block;
+            font-weight: 700;
+        }
+
+        .title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 3px;
+        }
+
+        .title i {
+            color: var(--accent);
+            margin-right: 10px;
+        }
+
+        .prediction-display {
+            margin: 30px 0;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            border-left: 4px solid var(--accent);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .prediction-display:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .prediction-value {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin: 20px 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            display: inline-block;
+            min-width: 200px;
+            height: 80px;
+            line-height: 80px;
+            border-radius: 10px;
+        }
+
+        .prediction-value.big {
+            color: var(--success);
+            text-shadow: 0 0 15px rgba(56, 176, 0, 0.5);
+            background: rgba(56, 176, 0, 0.1);
+        }
+
+        .prediction-value.small {
+            color: var(--warning);
+            text-shadow: 0 0 15px rgba(255, 170, 0, 0.5);
+            background: rgba(255, 170, 0, 0.1);
+        }
+
+        .prediction-value.loading {
+            color: var(--accent);
+            font-size: 1.5rem;
+        }
+
+        .countdown {
+            margin-top: 20px;
+            font-size: 1rem;
+            color: var(--accent-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        .countdown i {
+            font-size: 1.2rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px 35px;
+            margin: 20px 0;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, var(--primary), var(--primary-light));
+            z-index: -1;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover::before {
+            background: linear-gradient(45deg, var(--primary-light), var(--primary));
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.5s ease;
+            z-index: -1;
+        }
+
+        .btn:hover::after {
+            left: 100%;
+        }
+
+        .btn-primary {
+            color: white;
+        }
+
+        .btn-disabled {
+            background: var(--gray);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .btn-disabled:hover::before, .btn-disabled:hover::after {
+            background: var(--gray);
+            left: -100%;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(67, 97, 238, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(67, 97, 238, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(67, 97, 238, 0); }
+        }
+
+        .status {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: var(--gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.4);
+            text-align: center;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-10px); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        .shake {
+            animation: shake 0.5s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 576px) {
+            .card {
+                padding: 25px;
+            }
+            
+            .title {
+                font-size: 1.6rem;
+                margin-bottom: 25px;
+            }
+            
+            .prediction-display {
+                padding: 20px;
+                margin: 20px 0;
+            }
+            
+            .prediction-value {
+                font-size: 2.5rem;
+                height: 60px;
+                line-height: 60px;
+                min-width: 150px;
+            }
+            
+            .btn {
+                padding: 12px 25px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles-js"></div>
+    <div class="container">
+        <div class="card">
+            <h1 class="title">
+                <i class="fas fa-robot"></i>
+                BUNNY AI
+            </h1>
+            
+            <div class="prediction-display">
+                <div class="prediction-value" id="prediction-value">---</div>
+                <div class="countdown" id="countdown">
+                    <i class="fas fa-sync-alt"></i>
+                    <span id="countdown-text"></span>
+                </div>
+            </div>
+            
+            <button class="btn btn-primary pulse" id="predict-button">
+                <i class="fas fa-bolt" style="margin-right: 8px;"></i>PREDICT
+            </button>
+            
+            <div class="status">
+                <i class="fas fa-lock"></i>
+                <span></span>
+            </div>
+            
+            <div class="footer">
+                
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize particles.js
+            particlesJS('particles-js', {
+                "particles": {
+                    "number": {
+                        "value": 50,
+                        "density": {
+                            "enable": true,
+                            "value_area": 800
+                        }
+                    },
+                    "color": {
+                        "value": "#4cc9f0"
+                    },
+                    "shape": {
+                        "type": "circle",
+                        "stroke": {
+                            "width": 0,
+                            "color": "#000000"
+                        },
+                        "polygon": {
+                            "nb_sides": 5
+                        }
+                    },
+                    "opacity": {
+                        "value": 0.3,
+                        "random": true,
+                        "anim": {
+                            "enable": false,
+                            "speed": 1,
+                            "opacity_min": 0.1,
+                            "sync": false
+                        }
+                    },
+                    "size": {
+                        "value": 3,
+                        "random": true,
+                        "anim": {
+                            "enable": false,
+                            "speed": 40,
+                            "size_min": 0.1,
+                            "sync": false
+                        }
+                    },
+                    "line_linked": {
+                        "enable": true,
+                        "distance": 150,
+                        "color": "#4cc9f0",
+                        "opacity": 0.2,
+                        "width": 1
+                    },
+                    "move": {
+                        "enable": true,
+                        "speed": 2,
+                        "direction": "none",
+                        "random": true,
+                        "straight": false,
+                        "out_mode": "out",
+                        "bounce": false,
+                        "attract": {
+                            "enable": false,
+                            "rotateX": 600,
+                            "rotateY": 1200
+                        }
+                    }
+                },
+                "interactivity": {
+                    "detect_on": "canvas",
+                    "events": {
+                        "onhover": {
+                            "enable": true,
+                            "mode": "grab"
+                        },
+                        "onclick": {
+                            "enable": true,
+                            "mode": "push"
+                        },
+                        "resize": true
+                    },
+                    "modes": {
+                        "grab": {
+                            "distance": 140,
+                            "line_linked": {
+                                "opacity": 0.5
+                            }
+                        },
+                        "bubble": {
+                            "distance": 400,
+                            "size": 40,
+                            "duration": 2,
+                            "opacity": 8,
+                            "speed": 3
+                        },
+                        "repulse": {
+                            "distance": 200,
+                            "duration": 0.4
+                        },
+                        "push": {
+                            "particles_nb": 4
+                        },
+                        "remove": {
+                            "particles_nb": 2
+                        }
+                    }
+                },
+                "retina_detect": true
+            });
+
+            // DOM Elements
+            const predictButton = document.getElementById('predict-button');
+            const predictionValue = document.getElementById('prediction-value');
+            const countdownElement = document.getElementById('countdown-text');
+            
+            // State variables
+            let currentPeriod = '';
+            let currentPrediction = '';
+            let canGenerate = true;
+            let nextPeriodTime = 0;
+            
+            // Load saved prediction from localStorage if available
+            const savedPrediction = localStorage.getItem('currentPrediction');
+            const savedPeriod = localStorage.getItem('currentPeriod');
+            const savedExpiry = localStorage.getItem('predictionExpiry');
+            
+            // Initialize
+            initializePrediction();
+            startCountdownTimer();
+            
+            // Event listeners
+            predictButton.addEventListener('click', generatePrediction);
+            
+            // Function to initialize prediction state
+            function initializePrediction() {
+                const now = new Date().getTime();
+                
+                // Check if we have a saved prediction that hasn't expired
+                if (savedPrediction && savedPeriod && savedExpiry && now < parseInt(savedExpiry)) {
+                    currentPrediction = savedPrediction;
+                    currentPeriod = savedPeriod;
+                    predictionValue.textContent = currentPrediction;
+                    predictionValue.className = `prediction-value ${currentPrediction.toLowerCase()} float`;
+                    
+                    // Disable button if we're in the same period
+                    if (getCurrentPeriodId() === currentPeriod) {
+                        canGenerate = false;
+                        predictButton.classList.add('btn-disabled');
+                        predictButton.classList.remove('pulse');
+                    }
+                } else {
+                    // Clear expired prediction
+                    localStorage.removeItem('currentPrediction');
+                    localStorage.removeItem('currentPeriod');
+                    localStorage.removeItem('predictionExpiry');
+                    predictionValue.textContent = '---';
+                    predictionValue.className = 'prediction-value';
+                }
+            }
+            
+            // Function to get current period ID (unique identifier for each minute)
+            function getCurrentPeriodId() {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                
+                return `${year}${month}${day}${hours}${minutes}`;
+            }
+            
+            // Function to calculate next period time (next minute)
+            function calculateNextPeriodTime() {
+                const now = new Date();
+                nextPeriodTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes() + 1, 0, 0).getTime();
+                return nextPeriodTime;
+            }
+            
+            // Function to update countdown display
+            function updateCountdown() {
+                const now = new Date().getTime();
+                const distance = nextPeriodTime - now;
+                
+                if (distance <= 0) {
+                    countdownElement.textContent = 'New prediction available!';
+                    canGenerate = true;
+                    predictButton.classList.add('pulse');
+                    predictButton.classList.remove('btn-disabled');
+                    calculateNextPeriodTime();
+                    return;
+                }
+                
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                
+                countdownElement.textContent = ` ${String(Math.floor(minutes)).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
+            
+            // Function to start countdown timer
+            function startCountdownTimer() {
+                calculateNextPeriodTime();
+                updateCountdown();
+                setInterval(updateCountdown, 1000);
+            }
+            
+            // Function to generate a new prediction
+            function generatePrediction() {
+                const currentPeriodId = getCurrentPeriodId();
+                
+                // Check if we can generate a new prediction
+                if (!canGenerate) {
+                    showNotification('Please wait for the next period');
+                    predictButton.classList.add('shake');
+                    setTimeout(() => predictButton.classList.remove('shake'), 500);
+                    return;
+                }
+                
+                // Check if we already have a prediction for this period
+                if (currentPeriodId === currentPeriod) {
+                    showNotification('Prediction for this period already generated');
+                    return;
+                }
+                
+                // Add click animation
+                predictButton.classList.remove('pulse');
+                predictButton.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    predictButton.style.transform = '';
+                }, 200);
+                
+                // Simulate loading state
+                predictionValue.textContent = '...';
+                predictionValue.className = 'prediction-value loading';
+                predictionValue.style.animation = 'none';
+                
+                // Generate prediction after a short delay
+                setTimeout(() => {
+                    // Generate random prediction (50/50 chance)
+                    currentPrediction = Math.random() < 0.5 ? 'BIG' : 'SMALL';
+                    currentPeriod = currentPeriodId;
+                    
+                    // Save to localStorage with expiry time (next period)
+                    localStorage.setItem('currentPrediction', currentPrediction);
+                    localStorage.setItem('currentPeriod', currentPeriod);
+                    localStorage.setItem('predictionExpiry', nextPeriodTime.toString());
+                    
+                    // Update display
+                    predictionValue.textContent = currentPrediction;
+                    predictionValue.className = `prediction-value ${currentPrediction.toLowerCase()} float`;
+                    
+                    // Disable further generation until next period
+                    canGenerate = false;
+                    predictButton.classList.add('btn-disabled');
+                    predictButton.classList.remove('pulse');
+                    
+                    // Show notification
+                    showNotification(`Prediction: ${currentPrediction}`);
+                }, 1000);
+            }
+            
+            // Function to show notification
+            function showNotification(message) {
+                // Remove existing notification if any
+                const existingNotification = document.querySelector('.notification');
+                if (existingNotification) {
+                    existingNotification.remove();
+                }
+                
+                const notification = document.createElement('div');
+                notification.className = 'notification';
+                notification.style.position = 'fixed';
+                notification.style.bottom = '20px';
+                notification.style.left = '50%';
+                notification.style.transform = 'translateX(-50%)';
+                notification.style.backgroundColor = 'var(--dark)';
+                notification.style.color = 'white';
+                notification.style.padding = '15px 30px';
+                notification.style.borderRadius = '10px';
+                notification.style.boxShadow = '0 5px 20px rgba(0,0,0,0.4)';
+                notification.style.zIndex = '1000';
+                notification.style.animation = 'fadeIn 0.3s, fadeOut 0.3s 2.7s';
+                notification.style.borderLeft = '4px solid var(--accent)';
+                notification.style.display = 'flex';
+                notification.style.alignItems = 'center';
+                notification.style.gap = '10px';
+                notification.style.fontWeight = '600';
+                
+                // Add appropriate icon based on message
+                let iconClass = 'fa-info-circle';
+                let iconColor = 'var(--accent)';
+                
+                if (message.includes('wait')) {
+                    iconClass = 'fa-clock';
+                } else if (message.includes('BIG')) {
+                    iconClass = 'fa-arrow-up';
+                    iconColor = 'var(--success)';
+                } else if (message.includes('SMALL')) {
+                    iconClass = 'fa-arrow-down';
+                    iconColor = 'var(--warning)';
+                } else if (message.includes('already')) {
+                    iconClass = 'fa-exclamation-circle';
+                    iconColor = 'var(--danger)';
+                }
+                
+                notification.innerHTML = `
+                    <i class="fas ${iconClass}" style="color: ${iconColor};"></i>
+                    <span>${message}</span>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>
